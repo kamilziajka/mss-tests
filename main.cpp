@@ -7,9 +7,18 @@
 
 using namespace std;
 
-int main() {
-unsigned int d = argc > 1 ? atoi(argv[1]) : DEFAULT_D;
+int main(int argc, char* argv[]) {
+  int d = argc > 1 ? atoi(argv[1]) : DEFAULT_D;
 
-    cout << "Hello, World!" << endl;
-    return 0;
+  mpf_set_default_prec((mp_bitcnt_t) ceil(log2(10)) * d);
+
+  vector<mpz_class> numbers;
+  string input;
+
+  while (cin >> input) {
+    mpz_class number(input);
+    numbers.push_back(number);
+  }
+
+  return 0;
 }
