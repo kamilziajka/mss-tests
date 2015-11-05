@@ -100,11 +100,11 @@ protected:
     }
   }
 
-  static mpq_class compute_a_i(int i) {
+  mpq_class compute_a_i(int i) {
     return (mpq_class(i) * mpq_class(i)) / mpq_class(100);
   }
 
-  static mpq_class compute_p_i(int i) {
+  virtual mpq_class compute_p_i(int i) {
     return compute_a_i(i) - compute_a_i(i - 1);
   }
 };
@@ -116,12 +116,36 @@ public:
   }
 
 protected:
-  void compute_y() {
+  virtual void compute_y() {
     y.assign(7, 0);
 
     for (unsigned int i = 0; i + 4 < numbers.size(); i += 5) {
       y[whichHand(i)]++;
     }
+  }
+
+  virtual mpq_class compute_p_i(int i) {
+    mpq_class m(numbers.size());
+    mpq_class result;
+
+    switch (i) {
+      case pair:
+        result = (10 * m * (m - 1) * (m - 2) * (m - 3)) / (m * m * m * m * m); break;
+      case twoPair:
+        result = (15 * m * (m - 1) * (m - 2)) / (m * m * m * m * m); break;
+      case three:
+        result = (10 * m * (m - 1) * (m - 2)) / (m * m * m * m * m); break;
+      case full:
+        result = (10 * m * (m - 1)) / (m * m * m * m * m); break;
+      case four:
+        result = (5 * m * (m - 1)) / (m * m * m * m * m); break;
+      case same:
+        result = 1 / (m * m * m * m); break;
+      default:
+        result = (m * (m - 1) * (m - 2) * (m - 3) * (m - 4)) / (m * m * m * m * m); break;
+    }
+
+    return result;
   }
 
 private:
