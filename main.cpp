@@ -54,15 +54,21 @@ void kolmogorov(vector<mpq_class> &numbers, const unsigned int d) {
 
 class ChiSquaredTest {
 public:
-  static mpq_class execute(vector<mpq_class> numbers) {
-    vector<unsigned long int> y = compute_y(numbers);
-    return compute_v(numbers, y);
+  ChiSquaredTest(vector<mpq_class> numbers) : numbers(numbers) {
+    k = 10;
+  }
+
+  void execute(const unsigned int d) {
+    compute_y();
+    print_mpq(compute_v(), d);
   }
 
 protected:
-  static const unsigned int k = 10;
+  vector<mpq_class> numbers;
+  vector<unsigned long int> y;
+  unsigned int k;
 
-  static mpq_class compute_v(vector<mpq_class> numbers, vector<unsigned long int> y) {
+  mpq_class compute_v() {
     mpq_class n = numbers.size();
     mpq_class V = 0;
 
@@ -75,8 +81,7 @@ protected:
     return V;
   }
 
-  static vector<unsigned long int> compute_y(vector<mpq_class> numbers) {
-    vector<unsigned long int> y;
+  virtual void compute_y() {
     y.assign(k + 1, 0);
 
     int i = 1;
@@ -93,8 +98,6 @@ protected:
 
       y[i]++;
     }
-
-    return y;
   }
 
   static mpq_class compute_a_i(int i) {
@@ -107,26 +110,26 @@ protected:
 };
 
 class PokerTest: public ChiSquaredTest {
+public:
+  PokerTest(vector<mpq_class> numbers) : ChiSquaredTest(numbers) {
+    k = 7;
+  }
+
 protected:
-  static vector<unsigned long int> compute_y(vector<mpq_class> numbers) {
-    vector<unsigned long int> hands;
-    hands.assign(7, 0);
+  void compute_y() {
+    y.assign(7, 0);
 
     for (unsigned int i = 0; i + 4 < numbers.size(); i += 5) {
-      hands[whichHand(numbers, i)]++;
+      y[whichHand(i)]++;
     }
-
-    return hands;
   }
 
 private:
-  static const unsigned int k = 7;
-
   enum Hand {
     nothing = 0, pair = 1, twoPair = 2, three = 3, full = 4, four = 5, same = 6
   };
 
-  static Hand whichHand(vector<mpq_class> numbers, const unsigned int n) {
+  Hand whichHand(const unsigned int n) {
     if (numbers[n] == numbers[n + 1] && numbers[n + 1] == numbers[n + 2] && numbers[n + 2] == numbers[n + 3]
         && numbers[n + 3] == numbers[n + 4]) {
       return same;
@@ -181,11 +184,13 @@ int main(int argc, char* argv[]) {
 
   sort(numbers.begin(), numbers.end());
 
-  print_mpq(ChiSquaredTest::execute(numbers), d);
+  ChiSquaredTest chiSquaredTest(numbers);
+  chiSquaredTest.execute(d);
 
   kolmogorov(numbers, d);
 
-  print_mpq(PokerTest::execute(numbers), d);
+  PokerTest pokerTest(numbers);
+  pokerTest.execute(d);
 
   return 0;
 }
