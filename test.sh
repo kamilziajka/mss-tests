@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function test {
-  diff <(./mss_tests < test/test$1) <(cat ./test/wzor$1)
+  diff <(./mss_tests 100 < test/test$1) <(cat ./test/wzor$1)
 }
 
 if [ $# -eq 1 ] 
