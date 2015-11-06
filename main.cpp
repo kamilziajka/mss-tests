@@ -7,24 +7,44 @@ using namespace std;
 
 #define DEFAULT_D 100
 
-char buf[100000];
+void print_mpf(mpf_class number, const unsigned int d) {
+  mp_exp_t exp;
+  string result = number.get_str(exp);
 
-void print_mpf(mpf_class mpf, const unsigned int d) {
-  mpf_ptr mpf_ptr = mpf.get_mpf_t();
-  int actualPrinted;
-  gmp_sprintf(buf, "%.*Ff%n", d + 1, mpf_ptr, &actualPrinted);
-  actualPrinted--; // cut instead round
-
-  while (buf[actualPrinted - 1] == '0') {
-    actualPrinted--;
+  // adding leading zeroes
+  if (exp < 0) {
+    result = string(-exp, '0').append(result);
+    exp = 0;
+  }
+  // adding trailing zeroes
+  else if (result.size() < exp) {
+    result = result.append(string(exp - result.size(), '0'));
+    exp = result.size();
   }
 
-  printf("%.*s\n", actualPrinted, buf);
+  // adding point on the front
+  if (exp == 0) {
+    result = string("0.").append(result);
+    exp = 1;
+  }
+  // adding point in the middle
+  else if (exp < result.size()) {
+    result = result
+      .substr(0, exp)
+      .append(".")
+      .append(result.substr(exp, result.size()));
+  }
+
+  // rounding the number
+  if (result.size() - exp > d) {
+    result = result.substr(0, exp + d + 1);
+  }
+
+  cout << result << endl;
 }
 
-void print_mpq(mpq_class mpq, const unsigned int d) {
-  mpf_class mpq_f(mpq);
-  print_mpf(mpq_f, d);
+void print_mpq(mpq_class number, const unsigned int d) {
+  print_mpf(mpf_class(number), d);
 }
 
 void kolmogorov(vector<mpq_class> &numbers, const unsigned int d) {
